@@ -1,7 +1,7 @@
 package com.example.userapp.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +20,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Name is mandatory")
+    @Column(nullable = false, length = 50)
     private String name;
 
 }
