@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    env_file:
+      - ./env/postgre.env
+  backend:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - env/spring.env
+    depends_on:
+      - db
+volumes:
+  pgdata:
