@@ -6,9 +6,13 @@ Prerequisites:
 - Java 17 or higher
 - Docker
 
-To build and start the application, run the provided script:
+To build and start the application:
 
-./build-and-run.sh
+./mvnw clean
+
+./mvnw package -DskipTests
+
+docker-compose up --build
 
 API endpoints:
 
