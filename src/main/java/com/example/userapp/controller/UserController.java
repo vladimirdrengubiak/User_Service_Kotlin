@@ -1,6 +1,6 @@
 package com.example.userapp.controller;
 
-import com.example.userapp.Validation.ValidationGroups;
+import com.example.userapp.validation.ValidationGroups;
 import com.example.userapp.dto.UserDTO;
 import com.example.userapp.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,6 @@
 package com.example.userapp.dto;
 
-import com.example.userapp.Validation.ValidationGroups;
+import com.example.userapp.validation.ValidationGroups;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
