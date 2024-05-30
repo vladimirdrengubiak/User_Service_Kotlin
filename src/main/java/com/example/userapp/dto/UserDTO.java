@@ -25,5 +25,6 @@ public class UserDTO {
     @Size(min = 5, message = "Password must be at least 5 characters long", groups = {ValidationGroups.Create.class, ValidationGroups.Update.class})
     private String password;
     @NotBlank(message = "Role is mandatory", groups = ValidationGroups.Create.class)
+    @Pattern(regexp = "^(ROLE_USER|ROLE_ADMIN)$", message = "Role must be either ROLE_USER or ROLE_ADMIN", groups = {ValidationGroups.Create.class, ValidationGroups.Update.class})
     private String role;
 }
