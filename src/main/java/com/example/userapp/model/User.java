@@ -12,24 +12,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "users")
 public class User {
-    public User(String name) {
-        this.name = name;
-    }
-    public User(String name, String username, String password) {
+    public User(String name, String username, String password, String role) {
         this.name = name;
         this.username = username;
         this.password = password;
+        this.role = role;
     }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false, length = 50)
     private String name;
-    @Column
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
-    @Column
+    @Column(nullable = false)
     private String password;
-    @Column
+    @Column(nullable = false)
     private String role;
 
 }
