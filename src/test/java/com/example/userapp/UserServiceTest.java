@@ -2,6 +2,7 @@ package com.example.userapp;
 import com.example.userapp.dto.UserDTO;
 import com.example.userapp.exception.UserIdMismatchException;
 import com.example.userapp.exception.UserNotFoundException;
+import com.example.userapp.mapper.UserMapper;
 import com.example.userapp.model.User;
 import com.example.userapp.repository.UserRepository;
 import com.example.userapp.service.UserService;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
@@ -31,7 +31,7 @@ class UserServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private ModelMapper modelMapper;
+    private UserMapper userMapper;
 
     @InjectMocks
     private UserService userService;
@@ -49,20 +49,20 @@ class UserServiceTest {
     void testGetAllUsers() {
         List<User> users = Arrays.asList(user);
         when(userRepository.findAll()).thenReturn(users);
-        when(modelMapper.map(user, UserDTO.class)).thenReturn(userDTO);
+        when(userMapper.fromUser(user)).thenReturn(userDTO);
 
         List<UserDTO> result = userService.getAllUsers();
         assertEquals(1, result.size());
-        assertEquals("John", result.get(0).getName());
+        assertEquals("John", result.get(0).name());
     }
 
     @Test
     void testGetUserById() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(modelMapper.map(user, UserDTO.class)).thenReturn(userDTO);
+        when(userMapper.fromUser(user)).thenReturn(userDTO);
 
         UserDTO result = userService.getUserById(1L);
-        assertEquals("John", result.getName());
+        assertEquals("John", result.name());
     }
 
     @Test
@@ -74,34 +74,31 @@ class UserServiceTest {
 
     @Test
     void testCreateUser() {
-        when(modelMapper.map(userDTO, User.class)).thenReturn(user);
+        when(userMapper.toUser(userDTO)).thenReturn(user);
         when(passwordEncoder.encode(user.getPassword())).thenReturn("encodedPassword");
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        when(modelMapper.map(user, UserDTO.class)).thenReturn(userDTO);
+        when(userRepository.save(user)).thenReturn(user);
+        when(userMapper.fromUser(user)).thenReturn(userDTO);
 
         UserDTO result = userService.createUser(userDTO);
-        assertEquals("John", result.getName());
-        verify(userRepository, times(1)).save(any(User.class));
+        assertEquals("John", result.name());
+        verify(userRepository, times(1)).save(user);
     }
 
     @Test
     void testUpdateUser() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(passwordEncoder.encode(userDTO.getPassword())).thenReturn("encodedPassword");
-        when(modelMapper.map(user, UserDTO.class)).thenReturn(userDTO);
+        when(passwordEncoder.encode(userDTO.password())).thenReturn("encodedPassword");
+        when(userMapper.fromUser(user)).thenReturn(userDTO);
 
         UserDTO result = userService.updateUser(1L, userDTO);
-
-        assertEquals("John", result.getName());
+        assertEquals("John", result.name());
         verify(userRepository, times(1)).findById(1L);
-        verify(passwordEncoder, times(1)).encode(userDTO.getPassword());
-        verify(modelMapper, times(1)).map(user, UserDTO.class);
+        verify(passwordEncoder, times(1)).encode(userDTO.password());
     }
 
     @Test
     void testUpdateUser_UserIdMismatch() {
-        userDTO.setId(2L);
-        assertThrows(UserIdMismatchException.class, () -> userService.updateUser(1L, userDTO));
+        assertThrows(UserIdMismatchException.class, () -> userService.updateUser(2L, userDTO));
     }
 
     @Test

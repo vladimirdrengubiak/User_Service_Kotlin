@@ -3,10 +3,10 @@ package com.example.userapp.service;
 import com.example.userapp.dto.UserDTO;
 import com.example.userapp.exception.UserIdMismatchException;
 import com.example.userapp.exception.UserNotFoundException;
+import com.example.userapp.mapper.UserMapper;
 import com.example.userapp.repository.UserRepository;
 import com.example.userapp.model.User;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,52 +15,48 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private ModelMapper modelMapper;
+    private final UserMapper userMapper;
 
-    @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.modelMapper = modelMapper;
-    }
 
     public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(user -> modelMapper.map(user, UserDTO.class))
+        return userRepository.findAll()
+                .stream()
+                .map(userMapper::fromUser)
                 .collect(Collectors.toList());
     }
 
     public UserDTO getUserById(Long id) {
         User user = findUserById(id);
-        return modelMapper.map(user, UserDTO.class);
+        return userMapper.fromUser(user);
     }
 
     @Transactional
     public UserDTO createUser(UserDTO userDTO) {
-        userDTO.setId(null);
-        User user = modelMapper.map(userDTO, User.class);
+        User user = userMapper.toUser(userDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));  // Encode password before saving
-        return modelMapper.map(userRepository.save(user), UserDTO.class);
+        user.setId(null);
+        return userMapper.fromUser(userRepository.save(user));
     }
 
     @Transactional
     public UserDTO updateUser(Long id, UserDTO userDTO) {
-        if (!id.equals(userDTO.getId())) {
-            throw new UserIdMismatchException("Mismatch between URL ID (" + id + ") and request body ID (" + userDTO.getId() + ")");
+        if (!id.equals(userDTO.id())) {
+            throw new UserIdMismatchException("Mismatch between URL ID (" + id + ") and request body ID (" + userDTO.id() + ")");
         }
         User existingUser = findUserById(id);
-        existingUser.setName(userDTO.getName());
-        existingUser.setUsername(userDTO.getUsername());
-        existingUser.setRole(userDTO.getRole());
+        existingUser.setName(userDTO.name());
+        existingUser.setUsername(userDTO.username());
+        existingUser.setRole(userDTO.role());
 
-        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        if (userDTO.password() != null && !userDTO.password().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(userDTO.password()));
         }
 
-        return modelMapper.map(existingUser, UserDTO.class);
+        return userMapper.fromUser(existingUser);
     }
 
     @Transactional
