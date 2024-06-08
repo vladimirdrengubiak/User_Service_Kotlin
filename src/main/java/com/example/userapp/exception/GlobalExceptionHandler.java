@@ -18,20 +18,20 @@
     public class GlobalExceptionHandler {
         @ExceptionHandler(UserNotFoundException.class)
         public ResponseEntity<ErrorResponse> UserNotFound(UserNotFoundException ex) {
-            ErrorResponse errorResponse = new ErrorResponse(
-                    HttpStatus.NOT_FOUND.value(),
-                    ex.getMessage(),
-                    LocalDateTime.now()
-            );
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .status(HttpStatus.NOT_FOUND.value())
+                    .message(ex.getMessage())
+                    .timestamp(LocalDateTime.now())
+                    .build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
         @ExceptionHandler(UserIdMismatchException.class)
         public ResponseEntity<ErrorResponse> userIdMismatch(UserIdMismatchException ex) {
-            ErrorResponse errorResponse = new ErrorResponse(
-                    HttpStatus.BAD_REQUEST.value(),
-                    ex.getMessage(),
-                    LocalDateTime.now()
-            );
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .message(ex.getMessage())
+                    .timestamp(LocalDateTime.now())
+                    .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
 
@@ -43,12 +43,12 @@
                 String errorMessage = error.getDefaultMessage();
                 errors.put(fieldName, errorMessage);
             });
-            ErrorResponse errorResponse = new ErrorResponse(
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Validation failed",
-                    LocalDateTime.now(),
-                    errors
-            );
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .message("Validation failed")
+                    .timestamp(LocalDateTime.now())
+                    .details(errors)
+                    .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
 
@@ -60,32 +60,32 @@
                 String message = cv.getMessage();
                 errors.put(propertyPath, message);
             });
-            ErrorResponse errorResponse = new ErrorResponse(
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Constraint violation",
-                    LocalDateTime.now(),
-                    errors
-            );
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .message("Constraint violation")
+                    .timestamp(LocalDateTime.now())
+                    .details(errors)
+                    .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
 
         @ExceptionHandler(HttpMessageNotReadableException.class)
         public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-            ErrorResponse errorResponse = new ErrorResponse(
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Invalid JSON format: " + ex.getMessage(),
-                    LocalDateTime.now()
-            );
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .message("Invalid JSON format: " + ex.getMessage())
+                    .timestamp(LocalDateTime.now())
+                    .build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
 
         @ExceptionHandler(DataIntegrityViolationException.class)
         public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-            ErrorResponse errorResponse = new ErrorResponse(
-                    HttpStatus.CONFLICT.value(),
-                    "Database constraint violation: " + ex.getMessage(),
-                    LocalDateTime.now()
-            );
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .status(HttpStatus.CONFLICT.value())
+                    .message("Database constraint violation: " + ex.getMessage())
+                    .timestamp(LocalDateTime.now())
+                    .build();
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
         }
     }

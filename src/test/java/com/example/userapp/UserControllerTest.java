@@ -107,7 +107,6 @@ class UserControllerTest {
 
     @Test
     void updateUser_UserIdMismatch() throws Exception {
-        userDTO.setId(2L);
         String userJson = "{\"id\":2,\"name\":\"John\",\"username\":\"john\",\"password\":\"password\",\"role\":\"ROLE_USER\"}";
 
         doThrow(new UserIdMismatchException("Mismatch between url ID (1) and request body ID (2)"))

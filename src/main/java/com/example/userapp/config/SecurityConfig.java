@@ -1,28 +1,24 @@
 package com.example.userapp.config;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.userapp.service.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
 @Configuration
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
-    private UserDetailsService service;
 
-    private PasswordEncoder passwordEncoder;
+    private final PasswordConfig passwordConfig;
 
-    @Autowired
-    public SecurityConfig(UserDetailsService service, PasswordEncoder passwordEncoder) {
-        this.service = service;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final CustomUserDetailsService customUserDetailsService;
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -37,11 +33,12 @@ public class SecurityConfig {
         return http.build();
     }
 
-
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(service)
-                .passwordEncoder(passwordEncoder);
+    @Bean
+    DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(customUserDetailsService);
+        authProvider.setPasswordEncoder(passwordConfig.passwordEncoder());
+        return authProvider;
     }
 
 }
