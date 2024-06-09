@@ -1,0 +1,29 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - feature/phase_4_improvements
+      - main
+
+jobs:
+  build-deploy:
+    name: Build and Deploy User service
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: JDK 17 setup
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Run unit tests
+        run: mvn -B test --file pom.xml
+
+      - name: Build the user service
+        run: |
+          mvn clean
+          mvn -B package --file pom.xml
