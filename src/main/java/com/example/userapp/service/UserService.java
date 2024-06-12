@@ -7,11 +7,14 @@ import com.example.userapp.mapper.UserMapper;
 import com.example.userapp.repository.UserRepository;
 import com.example.userapp.model.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,22 +50,36 @@ public class UserService {
         if (!id.equals(userDTO.id())) {
             throw new UserIdMismatchException("Mismatch between URL ID (" + id + ") and request body ID (" + userDTO.id() + ")");
         }
-        User existingUser = findUserById(id);
-        existingUser.setName(userDTO.name());
-        existingUser.setUsername(userDTO.username());
-        existingUser.setRole(userDTO.role());
 
-        if (userDTO.password() != null && !userDTO.password().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(userDTO.password()));
-        }
+        User existingUser = findUserById(id);
+
+        Optional.ofNullable(userDTO.name()).
+                filter(StringUtils::hasText).
+                ifPresent(existingUser::setName);
+
+        Optional.ofNullable(userDTO.username()).
+                filter(StringUtils::hasText).
+                ifPresent(existingUser::setUsername);
+
+        Optional.ofNullable(userDTO.role()).
+                filter(StringUtils::hasText).
+                ifPresent(existingUser::setRole);
+
+        Optional.ofNullable(userDTO.password())
+                .filter(StringUtils::hasText)
+                .map(passwordEncoder::encode)
+                .ifPresent(existingUser::setPassword);
 
         return userMapper.fromUser(existingUser);
     }
 
     @Transactional
     public void deleteUser(Long id) {
-        User user = findUserById(id);
-        userRepository.delete(user);
+        try {
+            userRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new UserNotFoundException("User with id " + id + " not found");
+        }
     }
 
     private User findUserById(Long id) {
