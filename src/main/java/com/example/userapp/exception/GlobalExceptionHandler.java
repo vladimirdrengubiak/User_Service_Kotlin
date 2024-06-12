@@ -88,4 +88,14 @@
                     .build();
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
         }
+
+        @ExceptionHandler(UsernameAlreadyExistsException.class)
+        public ResponseEntity<ErrorResponse> UsernameAlreadyExistsException(UsernameAlreadyExistsException ex) {
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .message(ex.getMessage())
+                    .timestamp(LocalDateTime.now())
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
     }

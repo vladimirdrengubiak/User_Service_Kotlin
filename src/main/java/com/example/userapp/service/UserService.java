@@ -3,6 +3,7 @@ package com.example.userapp.service;
 import com.example.userapp.dto.UserDTO;
 import com.example.userapp.exception.UserIdMismatchException;
 import com.example.userapp.exception.UserNotFoundException;
+import com.example.userapp.exception.UsernameAlreadyExistsException;
 import com.example.userapp.mapper.UserMapper;
 import com.example.userapp.repository.UserRepository;
 import com.example.userapp.model.User;
@@ -39,6 +40,9 @@ public class UserService {
 
     @Transactional
     public UserDTO createUser(UserDTO userDTO) {
+        if (userRepository.existsByUsername(userDTO.username())) {
+            throw new UsernameAlreadyExistsException("Username " + userDTO.username() + " already exists");
+        }
         User user = userMapper.toUser(userDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));  // Encode password before saving
         user.setId(null);
@@ -49,6 +53,9 @@ public class UserService {
     public UserDTO updateUser(Long id, UserDTO userDTO) {
         if (!id.equals(userDTO.id())) {
             throw new UserIdMismatchException("Mismatch between URL ID (" + id + ") and request body ID (" + userDTO.id() + ")");
+        }
+        if (userRepository.existsByUsername(userDTO.username())) {
+            throw new UsernameAlreadyExistsException("Username " + userDTO.username() + " already exists");
         }
 
         User existingUser = findUserById(id);
