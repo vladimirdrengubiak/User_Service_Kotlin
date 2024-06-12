@@ -68,6 +68,11 @@ public class UserService {
                 filter(StringUtils::hasText).
                 ifPresent(existingUser::setUsername);
 
+
+        Optional.ofNullable(userDTO.username()).
+                filter(StringUtils::hasText).
+                ifPresent(existingUser::setUsername);
+
         Optional.ofNullable(userDTO.role()).
                 filter(StringUtils::hasText).
                 ifPresent(existingUser::setRole);
