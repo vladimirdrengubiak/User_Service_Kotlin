@@ -1,10 +1,10 @@
 #!/bin/bash
 
-JAR_FILE=target/user-app-0.0.1-SNAPSHOT.jar
+JAR_FILE=build/libs/userapp-0.0.1-SNAPSHOT.jar
 
-./mvnw clean
+./gradlew clean
 
-./mvnw package -DskipTests
+./gradlew build -x test
 
 if [ ! -f "$JAR_FILE" ]; then
     echo "Build failed: JAR file not found!"
